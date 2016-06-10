@@ -84,6 +84,8 @@ public class GaParser
 			}
 
 
+
+
 		}
 		catch(IOException e)
 		{
@@ -100,10 +102,12 @@ public class GaParser
 		}
 
 		System.out.println((char) 27 + "[32m" + ev1);
+		evs.remove(0);
 
-		while( ! evs.contains(ev2) )
+		while( ! evs.get(0).contains(ev2) )
 		{
-			if(! evs.contains(ev2))
+			if( ! evs.get(0).contains(ev2) )
+				System.out.println((char) 27 + "[31m" + ev1);
 			evs.remove(0);
 		}
 	}
