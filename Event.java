@@ -8,6 +8,12 @@ public class Event
 
 	Event(String name){ eventName = name; }
 
+	Event(String name, int color)
+	{
+		eventName = name;
+		setColor(color);
+	}
+
 	public final void setColor(int color){ eventColor = color; }
 
 	public int getEventColor(){ return eventColor; }
