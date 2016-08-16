@@ -97,7 +97,7 @@ public class GaParse
 				if(findEvent(mark, currentEvent, nextEvent, happenedEvents) >= 0)
 				{
 					mark = findEvent(mark, currentEvent, nextEvent, happenedEvents);
-
+					happenedEvents.get(mark).setColor(32);
 					//закрасили зеленым найденное ожидаемое событие
 					outputEvents.add(new Event(currentEvent,32) );
 					//events.get(mark).setColor(32);
@@ -132,13 +132,21 @@ public class GaParse
 				nextEvent = inCase.readLine();
 			}
 
-
+			for(Event elem: happenedEvents)
+			{
+				//закрасили красным неизвестно откуда взявшиеся события
+				if(elem.getEventColor() == 0)
+				{
+					elem.setColor(31);
+				}
+				//elem.print();
+			}
 
 			for(int i = 0; i < outputEvents.size(); i++)
 			{
 				for(int j = 0; j < happenedEvents.size(); j++)
 				{
-					if(happenedEvents.get(j).getEventName().contains(outputEvents.get(i).getEventName()) && happenedEvents.get(j).getEventColor() == 0)
+					if(happenedEvents.get(j).getEventName().contains(outputEvents.get(i).getEventName()) && happenedEvents.get(j).getEventColor() != 31)
 					{
 						happenedEvents.get(j).setColor(outputEvents.get(i).getEventColor());
 						break;
@@ -168,28 +176,13 @@ public class GaParse
 
 
 
-			for(Event elem: happenedEvents)
-			{
-				//закрасили красным неизвестно откуда взявшиеся события
-				if(elem.getEventColor() == 0)
-				{
-					elem.setColor(31);
-				}
-				//elem.print();
-			}
+
 
 			for(int i = 0; i < outputEvents.size(); i++)
 			{
 				for(int j = 0; j < happenedEvents.size(); j++)
 				{
-					if(happenedEvents.get(j).getEventName().contains(outputEvents.get(i).getEventName()) &&
-							happenedEvents.get(j).getEventColor() == 32 && outputEvents.get(i).getEventColor() == 32)
-					{
-						happenedEvents.get(j).print();
-						happenedEvents.get(j).setColor(0);
-						outputEvents.get(i).setColor(0);
-						break;
-					}
+
 					if(happenedEvents.get(j).getEventColor() == 31)
 					{
 						happenedEvents.get(j).print();
@@ -200,6 +193,14 @@ public class GaParse
 					if(outputEvents.get(i).getEventColor() == 33 || outputEvents.get(i).getEventColor() == 34 || outputEvents.get(i).getEventColor() == 35)
 					{
 						outputEvents.get(i).print();
+						outputEvents.get(i).setColor(0);
+						break;
+					}
+					if(happenedEvents.get(j).getEventName().contains(outputEvents.get(i).getEventName()) &&
+							happenedEvents.get(j).getEventColor() == 32 && outputEvents.get(i).getEventColor() == 32)
+					{
+						happenedEvents.get(j).print();
+						happenedEvents.get(j).setColor(0);
 						outputEvents.get(i).setColor(0);
 						break;
 					}
@@ -226,6 +227,11 @@ public class GaParse
 		{
 			return -1;
 		}*/
+
+		if(event.startsWith("w") || event.startsWith("n"))
+		{
+			event = event.substring(2);
+		}
 		int i = startPosition;
 		String currentEvent = logPart.get(i).getEventName();
 
