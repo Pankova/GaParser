@@ -63,17 +63,18 @@ public class GaParse
 
 			int localSize = size;
 
-			//ищем позицию стартового события
-			while( !happenedEvents.get(localSize).getEventName().contains(startEvent) )
+			//LogString previousEvent =  new LogString(happenedEvents.get(localSize - 1).getEventName());
+			LogString currentLogEvent = new LogString(happenedEvents.get(localSize).getEventName());;
+
+			//ищем позицию стартового события, с расчетом, что между двумя событиями одной сессии прошло не более 15 секунд
+			while(localSize > 0 && currentLogEvent.getDataDifference(new LogString(happenedEvents.get(localSize - 1).getEventName())) < 189000 )
 			{
+				long a = currentLogEvent.getDataDifference(new LogString(happenedEvents.get(localSize - 1).getEventName()));
+				currentLogEvent = new LogString(happenedEvents.get(localSize - 1).getEventName());
 				localSize--;
 
-				if (localSize < 0)
-				{
-					System.out.println("Start event is not found");
-					return;
-				}
 			}
+
 
 			//выделили из всего лога по GA последнюю сессию от запуска до выхода из приложения
 			happenedEvents = happenedEvents.subList(localSize, size + 1);
@@ -223,54 +224,57 @@ public class GaParse
 
 	public static int findEvent(int startPosition, String event, String finishEvent, List<Event> logPart)
 	{
-		/*if(startPosition == logPart.size())
+		if(startPosition == logPart.size())
 		{
 			return -1;
-		}*/
-
-		if(event.startsWith("w") || event.startsWith("n"))
-		{
-			event = event.substring(2);
 		}
-		int i = startPosition;
-		String currentEvent = logPart.get(i).getEventName();
 
-		if(finishEvent == null)
+		try
 		{
-			while(currentEvent != null)
+			if (event.startsWith("w") || event.startsWith("n"))
 			{
-				if(currentEvent.contains(event)&& logPart.get(i).getEventColor() == 0)
+				event = event.substring(2);
+			}
+			int i = startPosition;
+
+			String currentEvent = logPart.get(i).getEventName();
+
+			if (finishEvent == null)
+			{
+				while (currentEvent != null)
+				{
+					if (currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
+					{
+						return i;
+					}
+					i++;
+					currentEvent = logPart.get(i).getEventName();
+				}
+			}
+			while (!currentEvent.contains(finishEvent))//(finishEvent == null || ! meetedEvent.contains(finishEvent) || i == startPosition)
+			{
+				if (currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
 				{
 					return i;
 				}
-				i++;
-				currentEvent = logPart.get(i).getEventName();
-			}
-		}
-		while(! currentEvent.contains(finishEvent))//(finishEvent == null || ! meetedEvent.contains(finishEvent) || i == startPosition)
-		{
-			if(currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
-			{
-				return i;
-			}
 			/*if(finishEvent == null)
 			{
 				return -1;
 			}*/
-			i++;
-			currentEvent = logPart.get(i).getEventName();
+				i++;
+				currentEvent = logPart.get(i).getEventName();
 
-			if(currentEvent == null)
-			{
-				return -1;
+				if (currentEvent == null)
+				{
+					return -1;
+				}
+
 			}
 
-		}
-
-		if(currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
-		{
-			return i;
-		}
+			if (currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
+			{
+				return i;
+			}
 
 		/*for(int i = startPosition; i < logPart.size(); i++)
 		{
@@ -282,6 +286,12 @@ public class GaParse
 				return i;
 			}
 		}*/
+
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			System.out.println("Index out of bound logpart");
+		}
 		return -1;
 	}
 }
