@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -6,19 +7,28 @@ import java.util.*;
  */
 public class GaParse
 {
-	public static void main(String[] data)
+	File mcaseFile;
+	File mlogFile;
+
+	GaParse(File file1, File file2)
+	{
+		mcaseFile = file1;
+		mlogFile = file2;
+	}
+
+	public void run(JTextArea outArea, JTextArea logArea)
 	{
 		try
 		{
-			String logName = data[0], testCase = data[1];
+			outArea.append("Start\n");
 
 			//списали лог
-			File logFile = new File(logName + ".log");
+			File logFile = mlogFile;
 			BufferedReader inLog = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)));
 
 
 			//считываем ожидаемые события
-			File caseFile = new File(testCase + ".txt");
+			File caseFile = mcaseFile;
 
 			BufferedReader inCase = new BufferedReader(new InputStreamReader(new FileInputStream(caseFile)));
 
@@ -37,10 +47,10 @@ public class GaParse
 			while ((docString = inLog.readLine()) != null)
 			{
 				if (docString.contains("GA "))
-					happenedEvents.add(new Event(docString));
+					happenedEvents.add(new Event(docString, outArea));
 				//зафиксировали старт сессии
 				if (docString.equals(startSessinString))
-					happenedEvents.add(new Event("Start"));
+					happenedEvents.add(new Event("Start", outArea));
 			}
 
 
@@ -48,7 +58,7 @@ public class GaParse
 
 			if(size < 0)
 			{
-				System.out.println("There aren't GA events in the log");
+				outArea.append("There aren't GA events in the log");
 				return;
 			}
 
@@ -67,9 +77,9 @@ public class GaParse
 
 
 			for(Event ev : happenedEvents)
-				ev.print();
+				logArea.append(ev.getEventName() + "\n");//);ev.print();
 
-			System.out.println();
+			outArea.append("\n");
 
 			//начинаем считываем события,ожидаемые в кейсе
 			String currentEvent = inCase.readLine(), nextEvent = inCase.readLine();
@@ -146,7 +156,22 @@ public class GaParse
 			outputEvents.addAll(happenedEvents);
 			Collections.sort(outputEvents, sortEventByDate);
 
-			Event prevEvent = new Event("");
+			//костыль по причине того, что если события пришли в одно время, система их может переставить местами
+			//и будут рядом одно и то же пропущенное событие и красный лишний баг
+			for (int j = 1; j < outputEvents.size(); j++)
+			{
+				Event prev = outputEvents.get(j-1);
+				Event curr = outputEvents.get(j);
+				if (curr.getEventName().contains(prev.getEventName()) &&
+						(curr.getEventColor() == 31 && prev.getEventColor() == 34))
+				{
+					outputEvents.remove(j - 1);
+					outputEvents.get(j - 1).setColor(32);
+				}
+
+			}
+
+				Event prevEvent = new Event("", outArea);
 			for (Event ev: outputEvents)
 			{
 				//выводим, если разные имена или события из одного списка
@@ -159,21 +184,23 @@ public class GaParse
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			System.out.println("ArrayIndexOutOfBoundsException. Sorry, empty data source.");
+			outArea.append("ArrayIndexOutOfBoundsException. Sorry, empty data source.\n");
 		}
 		catch (FileNotFoundException e)
 		{
-			System.out.println("FileNotFoundException. Sorry, i can't find one of files or both.");
+
+			outArea.append("FileNotFoundException. Sorry, i can't find one of files or both.\n");
 		}
 		catch (IOException e)
 		{
-			System.out.println("IOException in input file. ");
+			outArea.append("IOException in input file.\n");
 		}
 
 	}
 
 	public static int findEvent(int startPosition, String event, String finishEvent, List<Event> logPart)
 	{
+
 		if(startPosition == logPart.size())
 		{
 			return -1;
@@ -198,7 +225,11 @@ public class GaParse
 						return i;
 					}
 					i++;
-					currentEvent = logPart.get(i).getEventName();
+
+					if (i != logPart.size())
+						currentEvent = logPart.get(i).getEventName();
+					else
+						return -1;
 				}
 			}
 			while (!currentEvent.contains(finishEvent))
@@ -221,6 +252,7 @@ public class GaParse
 			{
 				return i;
 			}
+
 
 		}
 		catch (IndexOutOfBoundsException e)

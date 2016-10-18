@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,26 +15,29 @@ public class Event
 	private int eventColor = 0;
 	private String data = "::";
 	private int listNumber = 0;
+	JTextArea outArea;
 
 
-	Event(String name)
+	Event(String name, JTextArea area)
 	{
 		eventName = name;
 		data = makeData(name);
+		outArea = area;
 	}
 
-	Event(String name, int color)
+	Event(String name, int color, JTextArea area)
 	{
 		eventName = name;
 		data = makeData(name);
 		setColor(color);
+		outArea = area;
 	}
 
 	private String makeData(String name)
 	{
 		try
 		{
-			return new LogString(name).getStringData();
+			return new LogString(name, outArea).getStringData();
 		}
 		catch(ArrayIndexOutOfBoundsException e)
 		{
@@ -85,7 +89,7 @@ public class Event
 		}
 		catch (ParseException e)
 		{
-			System.out.println("Sorry, i can't parse data from string");
+			outArea.append("Sorry, i can't parse data from string");
 			return null;
 		}
 	}
@@ -144,7 +148,7 @@ public class Event
 	{
 
 		String name = eventName;
-		int a = name.indexOf("I ");
+		int a = name.indexOf("I d");
 		int b = name.indexOf("GA ");
 		try
 		{
@@ -156,6 +160,6 @@ public class Event
 			//не было в строке указанных символов
 		}
 
-		System.out.println((char) 27 + "[" + eventColor + "m" + " " + data + " " + name);
+		outArea.append((char) 27 + "[" + eventColor + "m" + " " + data + " " + name + "\n");
 	}
 }

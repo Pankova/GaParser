@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,8 +12,13 @@ import java.util.Calendar;
 public class LogString
 {
 	String logString;
+	JTextArea outArea;
 
-	LogString(String str){ logString = str; }
+	LogString(String str, JTextArea area)
+	{
+		logString = str;
+		outArea = area;
+	}
 
 	public String getString(){ return logString; }
 
@@ -20,7 +26,7 @@ public class LogString
 	{
 		if(! logString.contains("GA "))
 		{
-			System.out.println("Sorry, it's incorrect string without GA events");
+			outArea.append("Sorry, it's incorrect string without GA events");
 			return -1;
 		}
 
@@ -40,7 +46,7 @@ public class LogString
 		dataArray = dataString.split(":");
 		if (dataArray.length != 3)
 		{
-			System.out.println("The data is incorrect in String");
+			outArea.append("The data is incorrect in String");
 			return "";
 		}
 
@@ -96,7 +102,7 @@ public class LogString
 		}
 		catch (ParseException e)
 		{
-			System.out.println("Sorry, i can't parse data from string");
+			outArea.append("Sorry, i can't parse data from string");
 			return null;
 		}
 	}
