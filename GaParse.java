@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 import java.io.*;
 import java.util.*;
 
@@ -7,28 +9,43 @@ import java.util.*;
  */
 public class GaParse
 {
-	File mcaseFile;
-	File mlogFile;
 
-	GaParse(File file1, File file2)
+	File caseFile;
+	File logFile;
+
+	JTextPane casePane;
+	JTextPane logPane;
+	JTextPane reportPane;
+
+	DefaultStyledDocument caseOut;
+	DefaultStyledDocument logOut;
+	DefaultStyledDocument reportOut;
+
+	GaParse(File file1, File file2, JTextPane pane1, JTextPane pane2, JTextPane pane3, DefaultStyledDocument doc1, DefaultStyledDocument doc2, DefaultStyledDocument doc3)
 	{
-		mcaseFile = file1;
-		mlogFile = file2;
+		caseFile = file1;
+		logFile = file2;
+		casePane = pane1;
+		logPane = pane2;
+		reportPane = pane3;
+		caseOut = doc1;
+		logOut = doc2;
+		reportOut = doc3;
 	}
 
-	public void run(JTextArea outArea, JTextArea logArea)
+	public void run()
 	{
 		try
 		{
-			outArea.append("Start\n");
+			//doc.insertString(doc.getLength(), " " + outLine + "\n", null);
+
+			out("Start\n", reportOut);
 
 			//списали лог
-			File logFile = mlogFile;
 			BufferedReader inLog = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)));
 
 
 			//считываем ожидаемые события
-			File caseFile = mcaseFile;
 
 			BufferedReader inCase = new BufferedReader(new InputStreamReader(new FileInputStream(caseFile)));
 
@@ -47,10 +64,10 @@ public class GaParse
 			while ((docString = inLog.readLine()) != null)
 			{
 				if (docString.contains("GA "))
-					happenedEvents.add(new Event(docString, outArea));
+					happenedEvents.add(new Event(docString, reportPane));
 				//зафиксировали старт сессии
 				if (docString.equals(startSessinString))
-					happenedEvents.add(new Event("Start", outArea));
+					happenedEvents.add(new Event("Start", reportPane));
 			}
 
 
@@ -58,7 +75,7 @@ public class GaParse
 
 			if(size < 0)
 			{
-				outArea.append("There aren't GA events in the log");
+				out("There aren't GA events in the log", reportOut);
 				return;
 			}
 
@@ -77,9 +94,9 @@ public class GaParse
 
 
 			for(Event ev : happenedEvents)
-				logArea.append(ev.getEventName() + "\n");//);ev.print();
+				out(ev.getEventName() + "\n", logOut);//);ev.print();
 
-			outArea.append("\n");
+			out("\n", reportOut);
 
 			//начинаем считываем события,ожидаемые в кейсе
 			String currentEvent = inCase.readLine(), nextEvent = inCase.readLine();
@@ -96,7 +113,7 @@ public class GaParse
 					happenedEvents.get(mark).setColor(32);
 
 					//закрасили зеленым найденное ожидаемое событие
-					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(),32, 1) );
+					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(),32, 1, reportPane) );
 
 					//если баг ожидаемый
 					if(currentEvent.startsWith("w") )
@@ -112,7 +129,7 @@ public class GaParse
 					//закрасили синим не регистрируемое событие и добавили его в вывод
 					Event prevEvent = outputEvents.get(outputEvents.size()-1);
 					String fakeData = prevEvent.incStringData();
-					outputEvents.add(new Event(currentEvent, 34, fakeData, 1));
+					outputEvents.add(new Event(currentEvent, 34, fakeData, 1, reportPane));
 
 					//если отсутствие события ожидаемо
 					if(currentEvent.startsWith("n") )
@@ -171,7 +188,7 @@ public class GaParse
 
 			}
 
-				Event prevEvent = new Event("", outArea);
+				Event prevEvent = new Event("", reportPane);
 			for (Event ev: outputEvents)
 			{
 				//выводим, если разные имена или события из одного списка
@@ -184,18 +201,17 @@ public class GaParse
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			outArea.append("ArrayIndexOutOfBoundsException. Sorry, empty data source.\n");
+			out("ArrayIndexOutOfBoundsException. Sorry, empty data source.\n", reportOut);
 		}
 		catch (FileNotFoundException e)
 		{
 
-			outArea.append("FileNotFoundException. Sorry, i can't find one of files or both.\n");
+			out("FileNotFoundException. Sorry, i can't find one of files or both.\n", reportOut);
 		}
 		catch (IOException e)
 		{
-			outArea.append("IOException in input file.\n");
+			out("IOException in input file.\n", reportOut);
 		}
-
 	}
 
 	public static int findEvent(int startPosition, String event, String finishEvent, List<Event> logPart)
@@ -264,6 +280,18 @@ public class GaParse
             System.out.println("NullPointerException in method contain() in findEvent(): finishEvent is null.");
         }
 		return -1;
+	}
+
+	public void out (String data, DefaultStyledDocument outArea)
+	{
+		try
+		{
+			outArea.insertString(outArea.getLength(), data, null);
+		}
+		catch (BadLocationException e)
+		{
+
+		}
 	}
 
 

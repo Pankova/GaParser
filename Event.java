@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,17 +17,17 @@ public class Event
 	private int eventColor = 0;
 	private String data = "::";
 	private int listNumber = 0;
-	JTextArea outArea;
+	StyledDocOut outArea;
 
 
-	Event(String name, JTextArea area)
+	Event(String name, StyledDocOut area)
 	{
 		eventName = name;
 		data = makeData(name);
 		outArea = area;
 	}
 
-	Event(String name, int color, JTextArea area)
+	Event(String name, int color, Sty area)
 	{
 		eventName = name;
 		data = makeData(name);
@@ -45,27 +47,30 @@ public class Event
 		}
 	}
 
-	Event(String name, int color, String fakeData)
+	Event(String name, int color, String fakeData, JTextPane pane;)
 	{
 		eventName = name;
 		data = fakeData;
 		setColor(color);
+		outArea = pane;
 	}
 
-	Event(String name, int color, String fakeData, int number)
+	Event(String name, int color, String fakeData, int number, JTextPane  pane)
 	{
 		eventName = name;
 		data = fakeData;
 		setColor(color);
 		listNumber = number;
+		outArea = pane;
 	}
 
-	Event(String name, int color, int number)
+	Event(String name, int color, int number, JTextPane pane)
 	{
 		eventName = name;
 		data = makeData(name);
 		setColor(color);
 		listNumber = number;
+		outArea = pane;
 	}
 
 	public int getListNumber(){ return listNumber; }
@@ -89,8 +94,20 @@ public class Event
 		}
 		catch (ParseException e)
 		{
-			outArea.append("Sorry, i can't parse data from string");
+			out("Sorry, i can't parse data from string");
 			return null;
+		}
+	}
+
+	public void out (String data)
+	{
+		try
+		{
+			outArea.insertString(outArea.getLength(), data, null);
+		}
+		catch (BadLocationException e)
+		{
+
 		}
 	}
 

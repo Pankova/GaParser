@@ -4,10 +4,7 @@
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,49 +18,7 @@ public class BoxWindow extends JFrame
     File testCaseFile;
     File getLogFile;
 
-    JPanel buttonPanel = new JPanel();
-    JPanel panel = new JPanel();
-    JPanel dataPanel = new JPanel();
 
-    JTextArea caseArea = new JTextArea(20,10);
-    JTextArea reportArea = new JTextArea(20,10);
-    JTextArea logpartArea = new JTextArea(20,10);
-
-    //честно пыталась понять зачем он, но так и не въехала - пишу, с муками совести, просто потому, что нужен
-    StyleContext stCxt =  StyleContext.getDefaultStyleContext();
-
-    final DefaultStyledDocument doc = new DefaultStyledDocument(stCxt);
-
-    JTextPane caseStyleArea = new JTextPane(doc);
-    JTextPane logStyleArea = new JTextPane(doc);
-    JTextPane reportStyleArea = new JTextPane(doc);
-
-
-
-    //стиль найденных багов (красный цвет)
-    final Style bugStyle = stCxt.addStyle("Bug", null);
-
-    //стиль ожидаемых событий (зеленый цвет)
-    final Style caseStyle = stCxt.addStyle("Case", null);
-
-    //стиль событий, которые есть в кейсе есть, но в логе не встретились (синий цвет)
-    Style notFoundStyle;
-
-    //стиль известных багов (желтый цвет)
-    Style waitBugStyle;
-
-    //стиль известных отсуствующих событий (сиреневый цвет)
-    Style waitNotFoundStyle;
-
-    final JButton loadCaseButton = new JButton("Case load");
-    final JButton loadLogButton = new JButton("Log load");
-    final JButton doCheckButton = new JButton("  Check  ");
-
-    JScrollPane casePanel = new JScrollPane(caseArea);
-    JScrollPane reportPanel = new JScrollPane(reportArea);
-    JScrollPane logpartPanel = new JScrollPane(logpartArea);
-
-    Dimension buttonSize = new Dimension(300,35);
 
 
     public BoxWindow()
@@ -78,6 +33,53 @@ public class BoxWindow extends JFrame
         //закрытии окна закрывалась и программа,
         //иначе она останется висеть в процессах
 
+        JPanel buttonPanel = new JPanel();
+        JPanel panel = new JPanel();
+        JPanel dataPanel = new JPanel();
+
+        //JTextArea caseArea = new JTextArea(20,10);
+        //JTextArea reportArea = new JTextArea(20,10);
+        //JTextArea logpartArea = new JTextArea(20,10);
+
+        //честно пыталась понять зачем он, но так и не въехала - пишу, с муками совести, просто потому, что нужен
+        StyleContext stCxt =  StyleContext.getDefaultStyleContext();
+
+        final DefaultStyledDocument docCase = new DefaultStyledDocument(stCxt);
+        final DefaultStyledDocument docLog = new DefaultStyledDocument(stCxt);
+        final DefaultStyledDocument docReport = new DefaultStyledDocument(stCxt);
+
+
+        JTextPane caseStyleArea = new JTextPane(docCase);
+        JTextPane logStyleArea = new JTextPane(docLog);
+        JTextPane reportStyleArea = new JTextPane(docReport);
+
+
+
+        //стиль найденных багов (красный цвет)
+        final Style bugStyle = stCxt.addStyle("Bug", null);
+
+        //стиль ожидаемых событий (зеленый цвет)
+        final Style caseStyle = stCxt.addStyle("Case", null);
+
+        //стиль событий, которые есть в кейсе есть, но в логе не встретились (синий цвет)
+        final Style notFoundStyle = stCxt.addStyle("NotFound", null);
+
+        //стиль известных багов (желтый цвет)
+        final Style waitBugStyle = stCxt.addStyle("WaitedBug", null);
+
+        //стиль известных отсуствующих событий (сиреневый цвет)
+        final Style waitNotFoundStyle = stCxt.addStyle("WaitNotFound", null);
+
+        final JButton loadCaseButton = new JButton("Case load");
+        final JButton loadLogButton = new JButton("Log load");
+        final JButton doCheckButton = new JButton("  Check  ");
+
+        JScrollPane casePanel = new JScrollPane(caseStyleArea);
+        JScrollPane reportPanel = new JScrollPane(reportStyleArea);
+        JScrollPane logpartPanel = new JScrollPane(logStyleArea);
+
+        Dimension buttonSize = new Dimension(300,35);
+
         //задаем стили шрифтов
 
         //stCxt.addAttribute(Color);
@@ -87,7 +89,7 @@ public class BoxWindow extends JFrame
         notFoundStyle.addAttribute(StyleConstants.Foreground, Color.blue);
         waitBugStyle.addAttribute(StyleConstants.Foreground, Color.yellow);
         waitNotFoundStyle.addAttribute(StyleConstants.Foreground, Color.magenta);
-        
+
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -95,15 +97,13 @@ public class BoxWindow extends JFrame
         dataPanel.setLayout(new BoxLayout(dataPanel, BoxLayout.X_AXIS));
         dataPanel.setPreferredSize(new Dimension(900,500));
 
-        caseArea.setLineWrap(true);
-        reportArea.setLineWrap(true);
-        logpartArea.setLineWrap(true);
+        //caseStyleArea.setLineWrap(true);
+        //reportStyleArea.setLineWrap(true);
+        //logStyleArea.setLineWrap(true);
 
-        caseArea.setEditable(false);
-        reportArea.setEditable(false);
-        logpartArea.setEditable(false);
-
-
+        caseStyleArea.setEditable(false);
+        reportStyleArea.setEditable(false);
+        logStyleArea.setEditable(false);
 
         casePanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         reportPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -128,14 +128,15 @@ public class BoxWindow extends JFrame
                 FileNameExtensionFilter caseFileFilter = new FileNameExtensionFilter("TXT files", "txt");
                 caseFileOpen.setFileFilter(caseFileFilter);
 
-                int pushButtonResult = caseFileOpen.showOpenDialog(caseArea);
+                int pushButtonResult = caseFileOpen.showOpenDialog(caseStyleArea);
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
-                    File caseFile = caseFileOpen.getSelectedFile();
-                    outFile(caseFile, caseArea);
-                    testCaseFile = caseFile;
-                    isCaseFile = true;
+
+                        File caseFile = caseFileOpen.getSelectedFile();
+                        outFile(caseFile, docCase);
+                        testCaseFile = caseFile;
+                        isCaseFile = true;
                 }
             }
         };
@@ -150,7 +151,7 @@ public class BoxWindow extends JFrame
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
 
-                int pushButtonResult = logFileOpen.showOpenDialog(logpartArea);
+                int pushButtonResult = logFileOpen.showOpenDialog(logStyleArea);
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
@@ -169,8 +170,8 @@ public class BoxWindow extends JFrame
             {
                 if (isCaseFile && isLogFile)
                 {
-                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile);
-                    parseProcess.run(reportArea, logpartArea);
+                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, docCase, docLog, docReport);
+                    parseProcess.run();
                 }
             }
         };
@@ -201,21 +202,21 @@ public class BoxWindow extends JFrame
 
     }
 
-    public void outFile (File file, JTextArea textArea)
+    public void outFile (File file, DefaultStyledDocument doc)
     {
         try
         {
             BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String outLine = input.readLine();
-            textArea.append(" Проверяемый кейс:\n\n");
+            doc.insertString(doc.getLength(), "Проверяемый кейс:\n\n", null);
             while (outLine != null)
             {
-                textArea.append(" " + outLine + "\n");
+                doc.insertString(doc.getLength(), " " + outLine + "\n", null);
                 outLine = input.readLine();
             }
-            textArea.setCaretPosition(0);
+            //doc.setCaretPosition(0);
         }
-        catch(FileNotFoundException exc)
+        catch (FileNotFoundException exc)
         {
             System.out.println("Пока Вы выбирали файл и решались нажать кнопку, файл куда-то делся.");
         }
@@ -224,6 +225,10 @@ public class BoxWindow extends JFrame
             System.out.println("Есть что-то в вашем выбранном файле с тест-кейсом невыводимое.");
         }
         catch (NullPointerException e)
+        {
+
+        }
+        catch (BadLocationException e)
         {
 
         }

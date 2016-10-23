@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,9 +14,9 @@ import java.util.Calendar;
 public class LogString
 {
 	String logString;
-	JTextArea outArea;
+	DefaultStyledDocument outArea;
 
-	LogString(String str, JTextArea area)
+	LogString(String str, DefaultStyledDocument area)
 	{
 		logString = str;
 		outArea = area;
@@ -26,8 +28,9 @@ public class LogString
 	{
 		if(! logString.contains("GA "))
 		{
-			outArea.append("Sorry, it's incorrect string without GA events");
+			out("Sorry, it's incorrect string without GA events");
 			return -1;
+
 		}
 
 		Date data = parseDataFromString();
@@ -46,12 +49,24 @@ public class LogString
 		dataArray = dataString.split(":");
 		if (dataArray.length != 3)
 		{
-			outArea.append("The data is incorrect in String");
+			out("The data is incorrect in String");
 			return "";
 		}
 
         return dataString;
     }
+
+    public void out (String data)
+	{
+		try
+		{
+			outArea.insertString(outArea.getLength(), data, null);
+		}
+		catch (BadLocationException e)
+		{
+
+		}
+	}
 
     public String incStringData()
 	{
@@ -102,7 +117,7 @@ public class LogString
 		}
 		catch (ParseException e)
 		{
-			outArea.append("Sorry, i can't parse data from string");
+			out("Sorry, i can't parse data from string");
 			return null;
 		}
 	}
