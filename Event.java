@@ -28,12 +28,38 @@ public class Event
 		data = makeData(name);
 	}
 
-	Event(String name, int color, JTextPane area, StyledDocument doc)
+	Event(String name, JTextPane area, StyledDocument doc, int color)
 	{
 		eventName = name;
 		outArea =  new StyledDocOut(area, doc);
 		data = makeData(name);
 		setColor(color);
+	}
+
+	Event(String name, JTextPane pane, StyledDocument doc, int color, String fakeData)
+	{
+		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
+		data = fakeData;
+		setColor(color);
+	}
+
+	Event(String name, JTextPane  pane, StyledDocument doc, int color, String fakeData, int number)
+	{
+		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
+		data = fakeData;
+		setColor(color);
+		listNumber = number;
+	}
+
+	Event(String name, JTextPane pane, StyledDocument doc, int color, int number)
+	{
+		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
+		data = makeData(name);
+		setColor(color);
+		listNumber = number;
 	}
 
 	private String makeData(String name)
@@ -48,32 +74,6 @@ public class Event
 			return "No time";
 		}
 
-	}
-
-	Event(String name, int color, String fakeData, JTextPane pane, StyledDocument doc)
-	{
-		eventName = name;
-		outArea = new StyledDocOut(pane, doc);
-		data = fakeData;
-		setColor(color);
-	}
-
-	Event(String name, int color, String fakeData, int number, JTextPane  pane, StyledDocument doc)
-	{
-		eventName = name;
-		outArea = new StyledDocOut(pane, doc);
-		data = fakeData;
-		setColor(color);
-		listNumber = number;
-	}
-
-	Event(String name, int color, int number, JTextPane pane, StyledDocument doc)
-	{
-		eventName = name;
-		outArea = new StyledDocOut(pane, doc);
-		data = makeData(name);
-		setColor(color);
-		listNumber = number;
 	}
 
 	public int getListNumber(){ return listNumber; }

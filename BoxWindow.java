@@ -19,108 +19,60 @@ public class BoxWindow extends JFrame
     File getLogFile;
 
 
-
-
-    public BoxWindow()
+    BoxWindow()
     {
-
-
         super("GaParser"); //Заголовок окна
-        setBounds(100, 100, 200, 200); //Если не выставить
-        //размер и положение
-        //то окно будет мелкое и незаметное
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //это нужно для того чтобы при
-        //закрытии окна закрывалась и программа,
-        //иначе она останется висеть в процессах
+        setBounds(100, 100, 200, 200);
 
-        JPanel buttonPanel = new JPanel();
+        //чтобы при закрытии окна закрывалась и программа (не висела в процессах)
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+
+        //main panel
         JPanel panel = new JPanel();
-        JPanel dataPanel = new JPanel();
-
-        //JTextArea caseArea = new JTextArea(20,10);
-        //JTextArea reportArea = new JTextArea(20,10);
-        //JTextArea logpartArea = new JTextArea(20,10);
-
-        //честно пыталась понять зачем он, но так и не въехала - пишу, с муками совести, просто потому, что нужен
-        StyleContext stCxt =  StyleContext.getDefaultStyleContext();
-
-
-
-
-        JTextPane caseStyleArea = new JTextPane();
-        JTextPane logStyleArea = new JTextPane();
-        JTextPane reportStyleArea = new JTextPane();
-
-
-
-        final StyledDocument docCase = caseStyleArea.getStyledDocument();
-        /*final StyledDocument docLog = logStyleArea.getStyledDocument();
-        final StyledDocument docReport = reportStyleArea.getStyledDocument();*/
-
-
-        /*//стиль найденных багов (красный цвет)
-        final Style bugStyle = stCxt.addStyle("Bug", null);
-
-        //стиль ожидаемых событий (зеленый цвет)
-        final Style caseStyle = stCxt.addStyle("Case", null);
-
-        //стиль событий, которые есть в кейсе есть, но в логе не встретились (синий цвет)
-        final Style notFoundStyle = stCxt.addStyle("NotFound", null);
-
-        //стиль известных багов (желтый цвет)
-        final Style waitBugStyle = stCxt.addStyle("WaitedBug", null);
-
-        //стиль известных отсуствующих событий (сиреневый цвет)
-        final Style waitNotFoundStyle = stCxt.addStyle("WaitNotFound", null);*/
-
-        final JButton loadCaseButton = new JButton("Case load");
-        final JButton loadLogButton = new JButton("Log load");
-        final JButton doCheckButton = new JButton("  Check  ");
-
-        JScrollPane casePanel = new JScrollPane(caseStyleArea);
-        JScrollPane reportPanel = new JScrollPane(reportStyleArea);
-        JScrollPane logpartPanel = new JScrollPane(logStyleArea);
-
-        Dimension buttonSize = new Dimension(300,35);
-
-        //задаем стили шрифтов
-
-        //stCxt.addAttribute(Color);
-
-        /*bugStyle.addAttribute(StyleConstants.Foreground, Color.red);
-        caseStyle.addAttribute(StyleConstants.Foreground, Color.green);
-        notFoundStyle.addAttribute(StyleConstants.Foreground, Color.blue);
-        waitBugStyle.addAttribute(StyleConstants.Foreground, Color.yellow);
-        waitNotFoundStyle.addAttribute(StyleConstants.Foreground, Color.magenta);*/
-
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setPreferredSize(new Dimension(1200,800));
 
+
+        //panel with testcase, part of log with last session and test report
+        JPanel dataPanel = new JPanel();
         dataPanel.setLayout(new BoxLayout(dataPanel, BoxLayout.X_AXIS));
-        dataPanel.setPreferredSize(new Dimension(1200,800));
-
-        //caseStyleArea.setLineWrap(true);
-        //reportStyleArea.setLineWrap(true);
-        //logStyleArea.setLineWrap(true);
-
-        caseStyleArea.setEditable(false);
-        reportStyleArea.setEditable(false);
-        logStyleArea.setEditable(false);
-
-        casePanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        reportPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        logpartPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-        dataPanel.add(casePanel, BorderLayout.WEST);
-        dataPanel.add(reportPanel, BorderLayout.CENTER);
-        dataPanel.add(logpartPanel, BorderLayout.EAST);
 
 
-        loadCaseButton.setPreferredSize(buttonSize);
-        loadLogButton.setPreferredSize(buttonSize);
-        doCheckButton.setPreferredSize(buttonSize);
+        //style panels, where styled text will be placed
+        JTextPane caseStylePane = new JTextPane();
+        JTextPane logStylePane = new JTextPane();
+        JTextPane reportStylePane = new JTextPane();
 
+        JScrollPane caseScrollPanel = new JScrollPane(caseStylePane);
+        JScrollPane reportScrollPanel = new JScrollPane(reportStylePane);
+        JScrollPane logScrollPanel = new JScrollPane(logStylePane);
+
+        caseScrollPanel.setMinimumSize(new Dimension(350, caseScrollPanel.getPreferredSize().height) );
+        reportScrollPanel.setMinimumSize(new Dimension(450, reportScrollPanel.getPreferredSize().height) );
+        logScrollPanel.setMinimumSize(new Dimension(450, logScrollPanel.getPreferredSize().height) );
+
+        caseScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        reportScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        logScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        //styledtext docs will be in style panels
+        final StyledDocument caseStyleDoc = caseStylePane.getStyledDocument();
+        /*final StyledDocument docLog = logStylePane.getStyledDocument();
+        final StyledDocument docReport = reportStylePane.getStyledDocument();*/
+
+        //user can not edit panels
+        caseStylePane.setEditable(false);
+        reportStylePane.setEditable(false);
+        logStylePane.setEditable(false);
+
+
+        dataPanel.add(caseScrollPanel);
+        dataPanel.add(reportScrollPanel);
+        dataPanel.add(logScrollPanel);
+
+
+        // buttons listeners
         ActionListener loadCaseButtonListener = new ActionListener()
         {
             @Override
@@ -131,14 +83,13 @@ public class BoxWindow extends JFrame
                 FileNameExtensionFilter caseFileFilter = new FileNameExtensionFilter("TXT files", "txt");
                 caseFileOpen.setFileFilter(caseFileFilter);
 
-                int pushButtonResult = caseFileOpen.showOpenDialog(caseStyleArea);
+                int pushButtonResult = caseFileOpen.showOpenDialog(caseStylePane);
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
-
-                    caseStyleArea.setText("");
+                    caseStylePane.setText("");
                     File caseFile = caseFileOpen.getSelectedFile();
-                    outFile(caseFile, docCase);
+                    outFile(caseFile, caseStyleDoc);
                     testCaseFile = caseFile;
                     isCaseFile = true;
                 }
@@ -155,15 +106,13 @@ public class BoxWindow extends JFrame
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
 
-                int pushButtonResult = logFileOpen.showOpenDialog(logStyleArea);
+                int pushButtonResult = logFileOpen.showOpenDialog(logStylePane);
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
-                    reportStyleArea.setText("");
-                    logStyleArea.setText("");
-                    File logFile = logFileOpen.getSelectedFile();
-                    //outFile(logFile, logpartArea);
-                    getLogFile = logFile;
+                    reportStylePane.setText("");
+                    logStylePane.setText("");
+                    getLogFile = logFileOpen.getSelectedFile();
                     isLogFile = true;
                 }
             }
@@ -176,37 +125,54 @@ public class BoxWindow extends JFrame
             {
                 if (isCaseFile && isLogFile)
                 {
-                    reportStyleArea.setText("");
-                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, caseStyleArea, logStyleArea, reportStyleArea); //, docCase, docLog, docReport);
+                    reportStylePane.setText("");
+                    logStylePane.setText("");
+                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, caseStylePane, logStylePane, reportStylePane); //, caseStyleDoc, docLog, docReport);
                     parseProcess.run();
+                    reportStylePane.setCaretPosition(0);
+                    logStylePane.setCaretPosition(0);
                 }
             }
         };
 
-        loadCaseButton.addActionListener(loadCaseButtonListener);
-        loadLogButton.addActionListener(loadLogButtonListener);
-        doCheckButton.addActionListener(checkButtonListener);
+
+        //button panel
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+        final JButton loadCaseButton = new JButton("Case load");
+        final JButton loadLogButton = new JButton("Log load");
+        final JButton doCheckButton = new JButton("  Check  ");
+
+        final Dimension buttonSize = new Dimension(300,35);
+
+        loadCaseButton.setPreferredSize(buttonSize);
+        loadLogButton.setPreferredSize(buttonSize);
+        doCheckButton.setPreferredSize(buttonSize);
 
         buttonPanel.add(loadCaseButton);
         buttonPanel.add(loadLogButton);
         buttonPanel.add(doCheckButton);
 
+        loadCaseButton.addActionListener(loadCaseButtonListener);
+        loadLogButton.addActionListener(loadLogButtonListener);
+        doCheckButton.addActionListener(checkButtonListener);
+
+
         panel.add(dataPanel);
         panel.add(buttonPanel);
 
+
         getContentPane().add(panel);
-        //setPreferredSize(new Dimension(350, 200));
         pack();
         setLocationRelativeTo(null);
-
-
     }
 
     public static void main(String[] args)
-    { //эта функция может быть и в другом классе
-        BoxWindow app = new BoxWindow(); //Создаем экземпляр нашего приложения
-        app.setVisible(true); //С этого момента приложение запущено!
-
+    {
+        BoxWindow app = new BoxWindow();
+        app.setVisible(true); //c этого момента приложение запущено
     }
 
     public void outFile (File file, StyledDocument doc)
@@ -218,10 +184,11 @@ public class BoxWindow extends JFrame
             doc.insertString(doc.getLength(), "Проверяемый кейс:\n\n", null);
             while (outLine != null)
             {
-                doc.insertString(doc.getLength(), " " + outLine + "\n", null);
+                if (!outLine.equals(""))
+                    doc.insertString(doc.getLength(), " " + outLine + "\n", null);
+
                 outLine = input.readLine();
             }
-            //doc.setCaretPosition(0);
         }
         catch (FileNotFoundException exc)
         {

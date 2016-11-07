@@ -41,12 +41,12 @@ public class GaParse
 		try
 		{
 			StyledDocOut logOutStyle = new StyledDocOut(logPane, logOut);
-			logOutStyle.printWithStyle("Проанализированный лог:\n\n", 0);
+			logOutStyle.printWithStyle("Последняя сессия приложения в логе (прилагается для перепроверки, что ничего не пропустили при анализе, в будущием выпилится):\n\n", 0);
 
 			StyledDocOut reportOutStyle = new StyledDocOut(reportPane, reportOut);
-			reportOutStyle.printWithStyle("Последняя сессия приложения в логе (прилагается для перепроверки, что ничего не пропустили при анализе, в будущием выпилится):\n\n", 0);
+			reportOutStyle.printWithStyle("Проанализированный лог:\n\n", 0);
 
-			//Выводим легенду
+			//выводим легенду
 			out("\nЛегенда:\n", caseOut);
 			StyledDocOut legendOutStyle = new StyledDocOut(casePane, caseOut);
 			legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
@@ -64,7 +64,6 @@ public class GaParse
 
 			//начало новой сессии приложения в логе
 			String startSessionString = "* Known files:";
-
 
 			//сюда будем считывать GA события из лога
 			List<Event> happenedEvents = new ArrayList();
@@ -119,6 +118,14 @@ public class GaParse
 
 			while(currentEvent != null)
 			{
+				//избавляемся от пустых строк
+				if(currentEvent.equals(""))
+				{
+					currentEvent = nextEvent;
+					nextEvent = inCase.readLine();
+					continue;
+				}
+
 				//если нашли ожидаемое событие в логе
 				if(findEvent(mark, currentEvent, nextEvent, happenedEvents) >= 0)
 				{
@@ -126,7 +133,7 @@ public class GaParse
 					happenedEvents.get(mark).setColor(32);
 
 					//закрасили зеленым найденное ожидаемое событие
-					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(),32, 1, reportPane, reportOut) );
+					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(), reportPane, reportOut, 32, 1) );
 
 					//если баг ожидаемый
 					if(currentEvent.startsWith("w") )
@@ -142,7 +149,7 @@ public class GaParse
 					//закрасили синим не регистрируемое событие и добавили его в вывод
 					Event prevEvent = outputEvents.get(outputEvents.size()-1);
 					String fakeData = prevEvent.incStringData();
-					outputEvents.add(new Event(currentEvent, 34, fakeData, 1, reportPane, reportOut));
+					outputEvents.add(new Event(currentEvent, reportPane, reportOut, 34, fakeData, 1));
 
 					//если отсутствие события ожидаемо
 					if(currentEvent.startsWith("n") )
