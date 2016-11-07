@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyledDocument;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,9 +15,9 @@ import java.util.Calendar;
 public class LogString
 {
 	String logString;
-	DefaultStyledDocument outArea;
+	StyledDocument outArea;
 
-	LogString(String str, DefaultStyledDocument area)
+	LogString(String str, StyledDocument area)
 	{
 		logString = str;
 		outArea = area;

@@ -44,18 +44,21 @@ public class BoxWindow extends JFrame
         //честно пыталась понять зачем он, но так и не въехала - пишу, с муками совести, просто потому, что нужен
         StyleContext stCxt =  StyleContext.getDefaultStyleContext();
 
-        final DefaultStyledDocument docCase = new DefaultStyledDocument(stCxt);
-        final DefaultStyledDocument docLog = new DefaultStyledDocument(stCxt);
-        final DefaultStyledDocument docReport = new DefaultStyledDocument(stCxt);
-
-
-        JTextPane caseStyleArea = new JTextPane(docCase);
-        JTextPane logStyleArea = new JTextPane(docLog);
-        JTextPane reportStyleArea = new JTextPane(docReport);
 
 
 
-        //стиль найденных багов (красный цвет)
+        JTextPane caseStyleArea = new JTextPane();
+        JTextPane logStyleArea = new JTextPane();
+        JTextPane reportStyleArea = new JTextPane();
+
+
+
+        final StyledDocument docCase = caseStyleArea.getStyledDocument();
+        /*final StyledDocument docLog = logStyleArea.getStyledDocument();
+        final StyledDocument docReport = reportStyleArea.getStyledDocument();*/
+
+
+        /*//стиль найденных багов (красный цвет)
         final Style bugStyle = stCxt.addStyle("Bug", null);
 
         //стиль ожидаемых событий (зеленый цвет)
@@ -68,7 +71,7 @@ public class BoxWindow extends JFrame
         final Style waitBugStyle = stCxt.addStyle("WaitedBug", null);
 
         //стиль известных отсуствующих событий (сиреневый цвет)
-        final Style waitNotFoundStyle = stCxt.addStyle("WaitNotFound", null);
+        final Style waitNotFoundStyle = stCxt.addStyle("WaitNotFound", null);*/
 
         final JButton loadCaseButton = new JButton("Case load");
         final JButton loadLogButton = new JButton("Log load");
@@ -84,18 +87,18 @@ public class BoxWindow extends JFrame
 
         //stCxt.addAttribute(Color);
 
-        bugStyle.addAttribute(StyleConstants.Foreground, Color.red);
+        /*bugStyle.addAttribute(StyleConstants.Foreground, Color.red);
         caseStyle.addAttribute(StyleConstants.Foreground, Color.green);
         notFoundStyle.addAttribute(StyleConstants.Foreground, Color.blue);
         waitBugStyle.addAttribute(StyleConstants.Foreground, Color.yellow);
-        waitNotFoundStyle.addAttribute(StyleConstants.Foreground, Color.magenta);
+        waitNotFoundStyle.addAttribute(StyleConstants.Foreground, Color.magenta);*/
 
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         dataPanel.setLayout(new BoxLayout(dataPanel, BoxLayout.X_AXIS));
-        dataPanel.setPreferredSize(new Dimension(900,500));
+        dataPanel.setPreferredSize(new Dimension(1200,800));
 
         //caseStyleArea.setLineWrap(true);
         //reportStyleArea.setLineWrap(true);
@@ -133,10 +136,11 @@ public class BoxWindow extends JFrame
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
 
-                        File caseFile = caseFileOpen.getSelectedFile();
-                        outFile(caseFile, docCase);
-                        testCaseFile = caseFile;
-                        isCaseFile = true;
+                    caseStyleArea.setText("");
+                    File caseFile = caseFileOpen.getSelectedFile();
+                    outFile(caseFile, docCase);
+                    testCaseFile = caseFile;
+                    isCaseFile = true;
                 }
             }
         };
@@ -155,6 +159,8 @@ public class BoxWindow extends JFrame
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
+                    reportStyleArea.setText("");
+                    logStyleArea.setText("");
                     File logFile = logFileOpen.getSelectedFile();
                     //outFile(logFile, logpartArea);
                     getLogFile = logFile;
@@ -170,7 +176,8 @@ public class BoxWindow extends JFrame
             {
                 if (isCaseFile && isLogFile)
                 {
-                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, docCase, docLog, docReport);
+                    reportStyleArea.setText("");
+                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, caseStyleArea, logStyleArea, reportStyleArea); //, docCase, docLog, docReport);
                     parseProcess.run();
                 }
             }
@@ -202,7 +209,7 @@ public class BoxWindow extends JFrame
 
     }
 
-    public void outFile (File file, DefaultStyledDocument doc)
+    public void outFile (File file, StyledDocument doc)
     {
         try
         {

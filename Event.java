@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyledDocument;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,57 +21,59 @@ public class Event
 	StyledDocOut outArea;
 
 
-	Event(String name, StyledDocOut area)
+	Event(String name, JTextPane area, StyledDocument doc)
 	{
 		eventName = name;
+		outArea = new StyledDocOut(area, doc);
 		data = makeData(name);
-		outArea = area;
 	}
 
-	Event(String name, int color, Sty area)
+	Event(String name, int color, JTextPane area, StyledDocument doc)
 	{
 		eventName = name;
+		outArea =  new StyledDocOut(area, doc);
 		data = makeData(name);
 		setColor(color);
-		outArea = area;
 	}
 
 	private String makeData(String name)
 	{
 		try
 		{
-			return new LogString(name, outArea).getStringData();
+			LogString logStr = new LogString(name, outArea.getDoc());
+			return logStr.getStringData();
 		}
-		catch(ArrayIndexOutOfBoundsException e)
+		catch(ArrayIndexOutOfBoundsException | NullPointerException e)
 		{
 			return "No time";
 		}
+
 	}
 
-	Event(String name, int color, String fakeData, JTextPane pane;)
+	Event(String name, int color, String fakeData, JTextPane pane, StyledDocument doc)
 	{
 		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
 		data = fakeData;
 		setColor(color);
-		outArea = pane;
 	}
 
-	Event(String name, int color, String fakeData, int number, JTextPane  pane)
+	Event(String name, int color, String fakeData, int number, JTextPane  pane, StyledDocument doc)
 	{
 		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
 		data = fakeData;
 		setColor(color);
 		listNumber = number;
-		outArea = pane;
 	}
 
-	Event(String name, int color, int number, JTextPane pane)
+	Event(String name, int color, int number, JTextPane pane, StyledDocument doc)
 	{
 		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
 		data = makeData(name);
 		setColor(color);
 		listNumber = number;
-		outArea = pane;
 	}
 
 	public int getListNumber(){ return listNumber; }
@@ -103,7 +106,7 @@ public class Event
 	{
 		try
 		{
-			outArea.insertString(outArea.getLength(), data, null);
+			outArea.getDoc().insertString(outArea.getDoc().getLength(), data, null);
 		}
 		catch (BadLocationException e)
 		{
@@ -177,6 +180,6 @@ public class Event
 			//не было в строке указанных символов
 		}
 
-		outArea.append((char) 27 + "[" + eventColor + "m" + " " + data + " " + name + "\n");
+		outArea.printWithStyle(data + " " + name + "\n", eventColor);
 	}
 }

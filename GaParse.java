@@ -1,8 +1,11 @@
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by Мария on 13.06.2016.
@@ -17,40 +20,50 @@ public class GaParse
 	JTextPane logPane;
 	JTextPane reportPane;
 
-	DefaultStyledDocument caseOut;
-	DefaultStyledDocument logOut;
-	DefaultStyledDocument reportOut;
+	StyledDocument caseOut;
+	StyledDocument logOut;
+	StyledDocument reportOut;
 
-	GaParse(File file1, File file2, JTextPane pane1, JTextPane pane2, JTextPane pane3, DefaultStyledDocument doc1, DefaultStyledDocument doc2, DefaultStyledDocument doc3)
+	GaParse(File file1, File file2, JTextPane pane1, JTextPane pane2, JTextPane pane3)//, StyledDocument doc1, StyledDocument doc2, StyledDocument doc3)
 	{
 		caseFile = file1;
 		logFile = file2;
 		casePane = pane1;
 		logPane = pane2;
 		reportPane = pane3;
-		caseOut = doc1;
-		logOut = doc2;
-		reportOut = doc3;
+		caseOut = pane1.getStyledDocument();
+		logOut = pane2.getStyledDocument();
+		reportOut = pane3.getStyledDocument();
 	}
 
 	public void run()
 	{
 		try
 		{
-			//doc.insertString(doc.getLength(), " " + outLine + "\n", null);
+			StyledDocOut logOutStyle = new StyledDocOut(logPane, logOut);
+			logOutStyle.printWithStyle("Проанализированный лог:\n\n", 0);
 
-			out("Start\n", reportOut);
+			StyledDocOut reportOutStyle = new StyledDocOut(reportPane, reportOut);
+			reportOutStyle.printWithStyle("Последняя сессия приложения в логе (прилагается для перепроверки, что ничего не пропустили при анализе, в будущием выпилится):\n\n", 0);
+
+			//Выводим легенду
+			out("\nЛегенда:\n", caseOut);
+			StyledDocOut legendOutStyle = new StyledDocOut(casePane, caseOut);
+			legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
+			legendOutStyle.printWithStyle("Waited event / Событие из кейса\n", 32); //green
+			legendOutStyle.printWithStyle("Waited bug / Известный баг\n", 33); //yellow
+			legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
+			legendOutStyle.printWithStyle("None Event expected / Известное отсутствующее событие\n", 35); //pink
 
 			//списали лог
 			BufferedReader inLog = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)));
 
 
 			//считываем ожидаемые события
-
 			BufferedReader inCase = new BufferedReader(new InputStreamReader(new FileInputStream(caseFile)));
 
 			//начало новой сессии приложения в логе
-			String startSessinString = "* Known files:";
+			String startSessionString = "* Known files:";
 
 
 			//сюда будем считывать GA события из лога
@@ -64,10 +77,10 @@ public class GaParse
 			while ((docString = inLog.readLine()) != null)
 			{
 				if (docString.contains("GA "))
-					happenedEvents.add(new Event(docString, reportPane));
+					happenedEvents.add(new Event(docString, reportPane, reportOut));
 				//зафиксировали старт сессии
-				if (docString.equals(startSessinString))
-					happenedEvents.add(new Event("Start", reportPane));
+				if (docString.equals(startSessionString))
+					happenedEvents.add(new Event("Start", reportPane, reportOut));
 			}
 
 
@@ -75,7 +88,7 @@ public class GaParse
 
 			if(size < 0)
 			{
-				out("There aren't GA events in the log", reportOut);
+				out("There aren't GA events in the log. Choose other log file", reportOut);
 				return;
 			}
 
@@ -94,7 +107,7 @@ public class GaParse
 
 
 			for(Event ev : happenedEvents)
-				out(ev.getEventName() + "\n", logOut);//);ev.print();
+				out(ev.getEventName() + "\n", logOut);
 
 			out("\n", reportOut);
 
@@ -113,7 +126,7 @@ public class GaParse
 					happenedEvents.get(mark).setColor(32);
 
 					//закрасили зеленым найденное ожидаемое событие
-					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(),32, 1, reportPane) );
+					outputEvents.add(new Event(happenedEvents.get(mark).getEventName(),32, 1, reportPane, reportOut) );
 
 					//если баг ожидаемый
 					if(currentEvent.startsWith("w") )
@@ -129,7 +142,7 @@ public class GaParse
 					//закрасили синим не регистрируемое событие и добавили его в вывод
 					Event prevEvent = outputEvents.get(outputEvents.size()-1);
 					String fakeData = prevEvent.incStringData();
-					outputEvents.add(new Event(currentEvent, 34, fakeData, 1, reportPane));
+					outputEvents.add(new Event(currentEvent, 34, fakeData, 1, reportPane, reportOut));
 
 					//если отсутствие события ожидаемо
 					if(currentEvent.startsWith("n") )
@@ -169,7 +182,7 @@ public class GaParse
 
 
 
-			//слили списки в один, выводит будем их объединение
+			//слили списки в один, выводить будем их объединение
 			outputEvents.addAll(happenedEvents);
 			Collections.sort(outputEvents, sortEventByDate);
 
@@ -188,7 +201,7 @@ public class GaParse
 
 			}
 
-				Event prevEvent = new Event("", reportPane);
+				Event prevEvent = new Event("", reportPane, reportOut);
 			for (Event ev: outputEvents)
 			{
 				//выводим, если разные имена или события из одного списка
@@ -282,7 +295,7 @@ public class GaParse
 		return -1;
 	}
 
-	public void out (String data, DefaultStyledDocument outArea)
+	public void out (String data, StyledDocument outArea)
 	{
 		try
 		{
