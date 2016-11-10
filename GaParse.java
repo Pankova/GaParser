@@ -44,16 +44,7 @@ public class GaParse
 			logOutStyle.printWithStyle("Последняя сессия приложения в логе (прилагается для перепроверки, что ничего не пропустили при анализе, в будущием выпилится):\n\n", 0);
 
 			StyledDocOut reportOutStyle = new StyledDocOut(reportPane, reportOut);
-			reportOutStyle.printWithStyle("Проанализированный лог:\n\n", 0);
-
-			//выводим легенду
-			out("\nЛегенда:\n", caseOut);
-			StyledDocOut legendOutStyle = new StyledDocOut(casePane, caseOut);
-			legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
-			legendOutStyle.printWithStyle("Waited event / Событие из кейса\n", 32); //green
-			legendOutStyle.printWithStyle("Waited bug / Известный баг\n", 33); //yellow
-			legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
-			legendOutStyle.printWithStyle("None Event expected / Известное отсутствующее событие\n", 35); //pink
+			reportOutStyle.printWithStyle("Проанализированный лог:\n\n\n", 0);
 
 			//списали лог
 			BufferedReader inLog = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)));

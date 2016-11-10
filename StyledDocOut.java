@@ -17,6 +17,8 @@ public class StyledDocOut
     {
         outPane = pane;
         doc = paneDoc;
+        /*AttributeSet lineSpacing = StyleConstants.FontConstants.setLineSpacing(10);
+        doc.setParagraphAttributes(lineSpacing);*/
         style = pane.addStyle("DefStyle", null);
         font = new Font("Courier", Font.PLAIN, 14);
         outPane.setFont(font);
@@ -68,8 +70,12 @@ public class StyledDocOut
                 break;
             }
             default:
+            {
+                Color black = new Color(133,133,133);
+                StyleConstants.setForeground(style, black);
                 out(str);
                 break;
+            }
         }
     }
 

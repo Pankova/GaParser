@@ -16,12 +16,12 @@ public class BoxWindow extends JFrame
     boolean isLogFile = false;
 
     File testCaseFile;
-    File getLogFile;
+    File logFile;
 
 
     BoxWindow()
     {
-        super("GaParser"); //Заголовок окна
+        super("GaParser 0.2"); //Заголовок окна
         setBounds(100, 100, 200, 200);
 
         //чтобы при закрытии окна закрывалась и программа (не висела в процессах)
@@ -90,6 +90,26 @@ public class BoxWindow extends JFrame
                     caseStylePane.setText("");
                     File caseFile = caseFileOpen.getSelectedFile();
                     outFile(caseFile, caseStyleDoc);
+
+                    //выводим легенду
+                    try
+                    {
+                        caseStyleDoc.insertString(caseStyleDoc.getLength(), "\nЛегенда:\n\n", null);
+                    }
+                    catch (BadLocationException e)
+                    {
+
+                    }
+
+                    StyledDocOut legendOutStyle = new StyledDocOut(caseStylePane, caseStyleDoc);
+                    legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
+                    legendOutStyle.printWithStyle("Expected event / Событие из кейса\n", 32); //green
+                    legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
+                    legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
+                    legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
+                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
+                    legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
+
                     testCaseFile = caseFile;
                     isCaseFile = true;
                 }
@@ -110,9 +130,9 @@ public class BoxWindow extends JFrame
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
-                    reportStylePane.setText("");
+                    reportStylePane.setText(" Лог загружен");
                     logStylePane.setText("");
-                    getLogFile = logFileOpen.getSelectedFile();
+                    logFile = logFileOpen.getSelectedFile();
                     isLogFile = true;
                 }
             }
@@ -127,11 +147,25 @@ public class BoxWindow extends JFrame
                 {
                     reportStylePane.setText("");
                     logStylePane.setText("");
-                    GaParse parseProcess = new GaParse(testCaseFile, getLogFile, caseStylePane, logStylePane, reportStylePane); //, caseStyleDoc, docLog, docReport);
+                    GaParse parseProcess = new GaParse(testCaseFile, logFile, caseStylePane, logStylePane, reportStylePane); //, caseStyleDoc, docLog, docReport);
                     parseProcess.run();
                     reportStylePane.setCaretPosition(0);
                     logStylePane.setCaretPosition(0);
                 }
+            }
+        };
+
+        ActionListener cleanButtonListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent)
+            {
+                testCaseFile = null;
+                logFile = null;
+                isCaseFile = false;
+                isLogFile = false;
+                caseStylePane.setText("");
+                logStylePane.setText("");
+                reportStylePane.setText("");
             }
         };
 
@@ -144,20 +178,24 @@ public class BoxWindow extends JFrame
         final JButton loadCaseButton = new JButton("Case load");
         final JButton loadLogButton = new JButton("Log load");
         final JButton doCheckButton = new JButton("  Check  ");
+        final JButton cleanButton = new JButton("Clean all");
 
         final Dimension buttonSize = new Dimension(300,35);
 
         loadCaseButton.setPreferredSize(buttonSize);
         loadLogButton.setPreferredSize(buttonSize);
         doCheckButton.setPreferredSize(buttonSize);
+        cleanButton.setPreferredSize(buttonSize);
 
         buttonPanel.add(loadCaseButton);
         buttonPanel.add(loadLogButton);
         buttonPanel.add(doCheckButton);
+        buttonPanel.add(cleanButton);
 
         loadCaseButton.addActionListener(loadCaseButtonListener);
         loadLogButton.addActionListener(loadLogButtonListener);
         doCheckButton.addActionListener(checkButtonListener);
+        cleanButton.addActionListener(cleanButtonListener);
 
 
         panel.add(dataPanel);
