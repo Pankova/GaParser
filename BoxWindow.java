@@ -116,30 +116,8 @@ public class BoxWindow extends JFrame
                     legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
                     legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
                     legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
-                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее с" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-                            "" +
-c
-
-
-                            ds
-
-                            qlegendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
+                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
+                    legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
 
                     testCaseFile = caseFile;
                     isCaseFile = true;
@@ -154,8 +132,7 @@ c
             {
                 String lastDir = prefFolder.get("LAST_LOG_FOLDER", "");
                 JFileChooser logFileOpen = new JFileChooser();
-                logFileOpen.setCurrentDirectory(new File(lastDir));
-
+              git 
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
 
