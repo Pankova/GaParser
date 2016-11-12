@@ -9,15 +9,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.prefs.*;
 
 public class BoxWindow extends JFrame
 {
-    boolean isCaseFile = false;
-    boolean isLogFile = false;
+    private boolean isCaseFile = false;
+    private boolean isLogFile = false;
 
-    File testCaseFile;
-    File logFile;
+    private File testCaseFile;
+    private File logFile;
 
+    private Preferences prefFolder;
 
     BoxWindow()
     {
@@ -72,13 +74,19 @@ public class BoxWindow extends JFrame
         dataPanel.add(logScrollPanel);
 
 
+        //remember last used folder
+        prefFolder = Preferences.userNodeForPackage(this.getClass());
+
+
         // buttons listeners
         ActionListener loadCaseButtonListener = new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent actionEvent)
             {
+                String lastDir = prefFolder.get("LAST_CASE_FOLDER", "");
                 JFileChooser caseFileOpen = new JFileChooser();
+                caseFileOpen.setCurrentDirectory(new File(lastDir));
 
                 FileNameExtensionFilter caseFileFilter = new FileNameExtensionFilter("TXT files", "txt");
                 caseFileOpen.setFileFilter(caseFileFilter);
@@ -89,6 +97,7 @@ public class BoxWindow extends JFrame
                 {
                     caseStylePane.setText("");
                     File caseFile = caseFileOpen.getSelectedFile();
+                    prefFolder.put("LAST_CASE_FOLDER", caseFile.getAbsolutePath());
                     outFile(caseFile, caseStyleDoc);
 
                     //выводим легенду
@@ -107,8 +116,30 @@ public class BoxWindow extends JFrame
                     legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
                     legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
                     legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
-                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
-                    legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
+                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее с" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+                            "" +
+c
+
+
+                            ds
+
+                            qlegendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
 
                     testCaseFile = caseFile;
                     isCaseFile = true;
@@ -121,7 +152,9 @@ public class BoxWindow extends JFrame
             @Override
             public void actionPerformed(ActionEvent actionEvent)
             {
+                String lastDir = prefFolder.get("LAST_LOG_FOLDER", "");
                 JFileChooser logFileOpen = new JFileChooser();
+                logFileOpen.setCurrentDirectory(new File(lastDir));
 
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
@@ -133,6 +166,7 @@ public class BoxWindow extends JFrame
                     reportStylePane.setText(" Лог загружен");
                     logStylePane.setText("");
                     logFile = logFileOpen.getSelectedFile();
+                    prefFolder.put("LAST_LOG_FOLDER", logFile.getAbsolutePath());
                     isLogFile = true;
                 }
             }

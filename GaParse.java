@@ -44,7 +44,7 @@ public class GaParse
 			logOutStyle.printWithStyle("Последняя сессия приложения в логе (прилагается для перепроверки, что ничего не пропустили при анализе, в будущием выпилится):\n\n", 0);
 
 			StyledDocOut reportOutStyle = new StyledDocOut(reportPane, reportOut);
-			reportOutStyle.printWithStyle("Проанализированный лог:\n\n\n", 0);
+			reportOutStyle.printWithStyle("Проанализированный лог:\n\n", 0);
 
 			//списали лог
 			BufferedReader inLog = new BufferedReader(new InputStreamReader(new FileInputStream(logFile)));
@@ -67,7 +67,14 @@ public class GaParse
 			while ((docString = inLog.readLine()) != null)
 			{
 				if (docString.contains("GA "))
+				{
+					/*int i = docString.indexOf(":");
+					docString = docString.substring(i - 2, docString.length());
+					i = docString.indexOf("UTC");
+					int j = docString.indexOf("GA ");
+					docString = docString.replace(docString.substring(i,j), "");*/
 					happenedEvents.add(new Event(docString, reportPane, reportOut));
+				}
 				//зафиксировали старт сессии
 				if (docString.equals(startSessionString))
 					happenedEvents.add(new Event("Start", reportPane, reportOut));
