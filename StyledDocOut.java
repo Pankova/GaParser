@@ -8,23 +8,18 @@ import java.awt.*;
 
 public class StyledDocOut
 {
-    JTextPane outPane;
-    StyledDocument doc;
-    Style style;
-    Font font;
+    private StyledDocument doc;
+    private Style style;
 
     StyledDocOut (JTextPane pane, StyledDocument paneDoc)
     {
-        outPane = pane;
+        JTextPane outPane = pane;
         doc = paneDoc;
-        /*AttributeSet lineSpacing = StyleConstants.FontConstants.setLineSpacing(10);
-        doc.setParagraphAttributes(lineSpacing);*/
         style = pane.addStyle("DefStyle", null);
-        font = new Font("Courier", Font.PLAIN, 14);
+
+        Font font = new Font("Courier", Font.PLAIN, 14);
         outPane.setFont(font);
     }
-
-    public JTextPane getPane () { return outPane; }
 
     public StyledDocument getDoc () { return doc; }
 
@@ -37,7 +32,7 @@ public class StyledDocOut
             case 31: //red
             {
                 Color red = new Color (166, 0, 8);
-                StyleConstants.setForeground(style, red);//red);
+                StyleConstants.setForeground(style, red);
                 out(str);
                 break;
             }
@@ -79,7 +74,7 @@ public class StyledDocOut
         }
     }
 
-    public void out (String data)
+    private void out(String data)
     {
         try
         {
@@ -87,7 +82,7 @@ public class StyledDocOut
         }
         catch (BadLocationException e)
         {
-
+            System.out.println("Problem in out function of StyleDocOut class");
         }
     }
  }

@@ -18,7 +18,7 @@ public class Event
 	private int eventColor = 0;
 	private String data = "::";
 	private int listNumber = 0;
-	StyledDocOut outArea;
+	private StyledDocOut outArea;
 
 
 	Event(String name, JTextPane area, StyledDocument doc)
@@ -36,7 +36,14 @@ public class Event
 		setColor(color);
 	}
 
-	Event(String name, JTextPane pane, StyledDocument doc, int color, String fakeData)
+	Event(String name, JTextPane pane, StyledDocument doc, String fakeData)
+	{
+		eventName = name;
+		outArea = new StyledDocOut(pane, doc);
+		data = fakeData;
+	}
+
+	Event(String name, JTextPane pane, StyledDocument doc, String fakeData, int color)
 	{
 		eventName = name;
 		outArea = new StyledDocOut(pane, doc);
@@ -44,7 +51,7 @@ public class Event
 		setColor(color);
 	}
 
-	Event(String name, JTextPane  pane, StyledDocument doc, int color, String fakeData, int number)
+	Event(String name, JTextPane  pane, StyledDocument doc, String fakeData, int color, int number)
 	{
 		eventName = name;
 		outArea = new StyledDocOut(pane, doc);
@@ -97,7 +104,7 @@ public class Event
 		}
 		catch (ParseException e)
 		{
-			out("Sorry, i can't parse data from string");
+			out("Sorry, i can't parse data from event");
 			return null;
 		}
 	}
@@ -110,7 +117,7 @@ public class Event
 		}
 		catch (BadLocationException e)
 		{
-
+			System.out.println("Problem in out function of Event class");
 		}
 	}
 
@@ -156,9 +163,6 @@ public class Event
 			return true;
 		}
 		return false;
-		/*Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);*/
-
 	}
 
 
@@ -166,20 +170,8 @@ public class Event
 
 	public void print()
 	{
-
 		String name = eventName;
-		int a = name.indexOf("I d");
-		int b = name.indexOf("GA ");
-		try
-		{
-			String excess = name.substring(a, b);
-			name = name.replace(excess, "");
-		}
-		catch (StringIndexOutOfBoundsException e)
-		{
-			//не было в строке указанных символов
-		}
-
-		outArea.printWithStyle(data + " " + name + "\n", eventColor);
+		outArea.printWithStyle(//data + " " +
+				name + "\n", eventColor);
 	}
 }

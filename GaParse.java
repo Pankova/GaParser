@@ -68,16 +68,17 @@ public class GaParse
 			{
 				if (docString.contains("GA "))
 				{
-					/*int i = docString.indexOf(":");
+					int i = docString.indexOf(":");
 					docString = docString.substring(i - 2, docString.length());
 					i = docString.indexOf("UTC");
 					int j = docString.indexOf("GA ");
-					docString = docString.replace(docString.substring(i,j), "");*/
+					docString = docString.replace(docString.substring(i,j), "");
+
 					happenedEvents.add(new Event(docString, reportPane, reportOut));
 				}
 				//зафиксировали старт сессии
 				if (docString.equals(startSessionString))
-					happenedEvents.add(new Event("Start", reportPane, reportOut));
+					happenedEvents.add(new Event("Start", reportPane, reportOut, "00:00:00"));
 			}
 
 
@@ -144,10 +145,14 @@ public class GaParse
 				//иначе ожидаемое событие не нашли в логе - заносим его пропущенным синим цветом
 				else
 				{
+					String fakeData = "00:00:00";
 					//закрасили синим не регистрируемое событие и добавили его в вывод
-					Event prevEvent = outputEvents.get(outputEvents.size()-1);
-					String fakeData = prevEvent.incStringData();
-					outputEvents.add(new Event(currentEvent, reportPane, reportOut, 34, fakeData, 1));
+					if (outputEvents.size() != 0)
+					{
+						Event prevEvent = outputEvents.get(outputEvents.size()-1);
+						fakeData = prevEvent.incStringData();
+					}
+					outputEvents.add(new Event(currentEvent, reportPane, reportOut, fakeData, 34, 1));
 
 					//если отсутствие события ожидаемо
 					if(currentEvent.startsWith("n") )
@@ -192,7 +197,7 @@ public class GaParse
 			Collections.sort(outputEvents, sortEventByDate);
 
 			//костыль по причине того, что если события пришли в одно время, система их может переставить местами
-			//и будут рядом одно и то же пропущенное событие и красный лишний баг
+			//и будут рядом одно и то же пропущенное событие, и красный лишний баг
 			for (int j = 1; j < outputEvents.size(); j++)
 			{
 				Event prev = outputEvents.get(j-1);
@@ -206,7 +211,7 @@ public class GaParse
 
 			}
 
-				Event prevEvent = new Event("", reportPane, reportOut);
+				Event prevEvent = new Event("", reportPane, reportOut, "25:00:00");
 			for (Event ev: outputEvents)
 			{
 				//выводим, если разные имена или события из одного списка
@@ -219,7 +224,7 @@ public class GaParse
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			out("ArrayIndexOutOfBoundsException. Sorry, empty data source.\n", reportOut);
+			out("GaParse class. ArrayIndexOutOfBoundsException. Sorry, empty data source.\n", reportOut);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -234,7 +239,6 @@ public class GaParse
 
 	public static int findEvent(int startPosition, String event, String finishEvent, List<Event> logPart)
 	{
-
 		if(startPosition == logPart.size())
 		{
 			return -1;
@@ -244,7 +248,11 @@ public class GaParse
 		{
 			if (event.startsWith("w") || event.startsWith("n"))
 			{
-				event = event.substring(2);
+				//так мы делаем валидным два способа записи "w Event" и "wEvent"
+				if (event.startsWith("w ") || event.startsWith("n "))
+					event = event.substring(2);
+				else
+					event = event.substring(1);
 			}
 			int i = startPosition;
 
@@ -266,6 +274,7 @@ public class GaParse
 						return -1;
 				}
 			}
+
 			while (!currentEvent.contains(finishEvent))
 			{
 				if (currentEvent.contains(event) && logPart.get(i).getEventColor() == 0)
@@ -273,6 +282,13 @@ public class GaParse
 					return i;
 				}
 				i++;
+
+				//если перевалили за границу лога
+				if(i == logPart.size())
+				{
+					return -1;
+				}
+
 				currentEvent = logPart.get(i).getEventName();
 
 				if (currentEvent == null)
@@ -308,7 +324,7 @@ public class GaParse
 		}
 		catch (BadLocationException e)
 		{
-
+			System.out.println("Problem in out function of GaParse class");
 		}
 	}
 
@@ -331,7 +347,6 @@ public class GaParse
 			if (result != 0){ return result; }
 
 			return  ev2.getEventName().compareTo(ev1.getEventName());
-
 		}
 	};
 

@@ -14,8 +14,8 @@ import java.util.Calendar;
  */
 public class LogString
 {
-	String logString;
-	StyledDocument outArea;
+	private String logString;
+	private StyledDocument outArea;
 
 	LogString(String str, StyledDocument area)
 	{
@@ -37,15 +37,13 @@ public class LogString
 		Date data = parseDataFromString();
 
 		//we get time 01.01.1970
-		long dataLong = data.getTime();
-
-		return dataLong;
+		return data.getTime();
 	}
 
 	public String getStringData()
     {
         String [] dataArray = logString.split(" ");
-        String dataString = dataArray[2];
+        String dataString = dataArray[0];
 
 		dataArray = dataString.split(":");
 		if (dataArray.length != 3)
@@ -65,7 +63,7 @@ public class LogString
 		}
 		catch (BadLocationException e)
 		{
-
+			System.out.println("Problem in out function of LogString class");
 		}
 	}
 

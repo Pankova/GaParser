@@ -24,7 +24,7 @@ public class BoxWindow extends JFrame
     BoxWindow()
     {
         super("GaParser 0.2"); //Заголовок окна
-        setBounds(100, 100, 200, 200);
+        //setBounds(100, 100, 200, 200);
 
         //чтобы при закрытии окна закрывалась и программа (не висела в процессах)
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,33 +43,48 @@ public class BoxWindow extends JFrame
 
         //style panels, where styled text will be placed
         JTextPane caseStylePane = new JTextPane();
+        JTextPane legendStylePane = new JTextPane();
         JTextPane logStylePane = new JTextPane();
         JTextPane reportStylePane = new JTextPane();
+
+        JPanel caseAndLegendPanel = new JPanel();
+
+        JSplitPane caseAndLegendSplitPane = new JSplitPane();
+        caseAndLegendPanel.setLayout(new BoxLayout(caseAndLegendPanel, BoxLayout.Y_AXIS));
+        //caseAndLegendPanel.setMaximumSize(new Dimension(350, caseAndLegendPanel.getPreferredSize().height));
 
         JScrollPane caseScrollPanel = new JScrollPane(caseStylePane);
         JScrollPane reportScrollPanel = new JScrollPane(reportStylePane);
         JScrollPane logScrollPanel = new JScrollPane(logStylePane);
+        JScrollPane legendScrollPanel = new JScrollPane(legendStylePane);
 
         caseScrollPanel.setMinimumSize(new Dimension(350, caseScrollPanel.getPreferredSize().height) );
+        legendScrollPanel.setMinimumSize(new Dimension(350, legendScrollPanel.getPreferredSize().height));
         reportScrollPanel.setMinimumSize(new Dimension(450, reportScrollPanel.getPreferredSize().height) );
         logScrollPanel.setMinimumSize(new Dimension(450, logScrollPanel.getPreferredSize().height) );
 
         caseScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        legendScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         reportScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         logScrollPanel.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         //styledtext docs will be in style panels
         final StyledDocument caseStyleDoc = caseStylePane.getStyledDocument();
+        final StyledDocument legendStyleDoc = legendStylePane.getStyledDocument();
         /*final StyledDocument docLog = logStylePane.getStyledDocument();
         final StyledDocument docReport = reportStylePane.getStyledDocument();*/
 
         //user can not edit panels
-        caseStylePane.setEditable(false);
+        caseStylePane.setEditable(true);
+        legendStylePane.setEditable(false);
         reportStylePane.setEditable(false);
         logStylePane.setEditable(false);
 
 
-        dataPanel.add(caseScrollPanel);
+        caseAndLegendPanel.add(caseScrollPanel);
+        caseAndLegendPanel.add(legendScrollPanel);
+
+        dataPanel.add(caseAndLegendPanel);
         dataPanel.add(reportScrollPanel);
         dataPanel.add(logScrollPanel);
 
@@ -96,6 +111,7 @@ public class BoxWindow extends JFrame
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
                     caseStylePane.setText("");
+                    legendStylePane.setText("");
                     File caseFile = caseFileOpen.getSelectedFile();
                     prefFolder.put("LAST_CASE_FOLDER", caseFile.getAbsolutePath());
                     outFile(caseFile, caseStyleDoc);
@@ -103,14 +119,14 @@ public class BoxWindow extends JFrame
                     //выводим легенду
                     try
                     {
-                        caseStyleDoc.insertString(caseStyleDoc.getLength(), "\nЛегенда:\n\n", null);
+                        legendStyleDoc.insertString(legendStyleDoc.getLength(), "\nЛегенда:\n\n", null);
                     }
                     catch (BadLocationException e)
                     {
-
+                        System.out.println("Problem in out legend in loadCaseButtonListener");
                     }
 
-                    StyledDocOut legendOutStyle = new StyledDocOut(caseStylePane, caseStyleDoc);
+                    StyledDocOut legendOutStyle = new StyledDocOut(legendStylePane, legendStyleDoc);
                     legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
                     legendOutStyle.printWithStyle("Expected event / Событие из кейса\n", 32); //green
                     legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
@@ -131,8 +147,8 @@ public class BoxWindow extends JFrame
             public void actionPerformed(ActionEvent actionEvent)
             {
                 String lastDir = prefFolder.get("LAST_LOG_FOLDER", "");
-                JFileChooser logFileOpen = new JFileChooser();
-              git 
+                JFileChooser logFileOpen = new JFileChooser(lastDir);
+
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
 
@@ -140,7 +156,7 @@ public class BoxWindow extends JFrame
 
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
-                    reportStylePane.setText(" Лог загружен");
+                    reportStylePane.setText(" Йоу, лог загружен!");
                     logStylePane.setText("");
                     logFile = logFileOpen.getSelectedFile();
                     prefFolder.put("LAST_LOG_FOLDER", logFile.getAbsolutePath());
@@ -158,6 +174,31 @@ public class BoxWindow extends JFrame
                 {
                     reportStylePane.setText("");
                     logStylePane.setText("");
+
+                    try
+                    {
+                        //get edited text in casefile and save it to chosen file
+                        String finalTestCase = caseStyleDoc.getText(0, caseStyleDoc.getLength()-1);
+
+                        //19 - cut off const string in the start "Проверяемый кейс:\n\n"
+                        finalTestCase = finalTestCase.substring(19);
+
+                        String filename = "filename.txt";
+                        PrintWriter out = new PrintWriter(filename);
+                        out.println(finalTestCase);
+                        out.close();
+
+                        testCaseFile = new File (filename);
+                    }
+                    catch (BadLocationException e)
+                    {
+                        System.out.println("Problem in getting final testcase text. Please load testcase again.");
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        System.out.println("BoxWindow class. Problem in saving new test case file.");
+                    }
+
                     GaParse parseProcess = new GaParse(testCaseFile, logFile, caseStylePane, logStylePane, reportStylePane); //, caseStyleDoc, docLog, docReport);
                     parseProcess.run();
                     reportStylePane.setCaretPosition(0);
@@ -234,7 +275,7 @@ public class BoxWindow extends JFrame
             while (outLine != null)
             {
                 if (!outLine.equals(""))
-                    doc.insertString(doc.getLength(), " " + outLine + "\n", null);
+                    doc.insertString(doc.getLength(), outLine + "\n", null);
 
                 outLine = input.readLine();
             }
