@@ -2,7 +2,6 @@
  * Created by mary on 18.09.16.
  */
 
-import sun.rmi.log.ReliableLog;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -76,7 +75,7 @@ public class BoxWindow extends JFrame
         final StyledDocument logStyleDoc = logStylePane.getStyledDocument();
         final StyledDocument reportStyleDoc = reportStylePane.getStyledDocument();
 
-        //user can not edit panels
+        //user can not edit panels except casePanel
         caseStylePane.setEditable(true);
         legendStylePane.setEditable(false);
         reportStylePane.setEditable(false);
@@ -90,10 +89,8 @@ public class BoxWindow extends JFrame
         dataPanel.add(reportScrollPanel);
         dataPanel.add(logScrollPanel);
 
-
         //remember last used folder
         prefFolder = Preferences.userNodeForPackage(this.getClass());
-
 
         // buttons listeners
         ActionListener loadCaseButtonListener = new ActionListener()
@@ -113,13 +110,10 @@ public class BoxWindow extends JFrame
                 if (pushButtonResult == JFileChooser.APPROVE_OPTION)
                 {
                     caseStylePane.setText("");
-                    legendStylePane.setText("");
                     File caseFile = caseFileOpen.getSelectedFile();
                     prefFolder.put("LAST_CASE_FOLDER", caseFile.getAbsolutePath());
                     outFile(caseFile, caseStyleDoc);
-
-                    //выводим легенду
-                    outLegend(legendStylePane, legendStyleDoc);
+                    caseStylePane.setCaretPosition(0);
                     testCaseFile = caseFile;
                     isCaseFile = true;
                 }
@@ -134,13 +128,11 @@ public class BoxWindow extends JFrame
                     for( int i = 0; i < files.length; i++ )
                     {
                         caseStylePane.setText("");
-                        legendStylePane.setText("");
                         File caseFile = files[0];
                         prefFolder.put("LAST_CASE_FOLDER", caseFile.getAbsolutePath());
                         testCaseFile = caseFile;
                         outFile(caseFile, caseStyleDoc);
-                        //выводим легенду
-                        outLegend(legendStylePane, legendStyleDoc);
+                        caseStylePane.setCaretPosition(0);
                         isCaseFile = true;
                     }
                 }
@@ -189,8 +181,6 @@ public class BoxWindow extends JFrame
             }
         );
 
-
-
         ActionListener checkButtonListener = new ActionListener()
         {
             @Override
@@ -200,6 +190,9 @@ public class BoxWindow extends JFrame
                 {
                     reportStylePane.setText("");
                     logStylePane.setText("");
+                    legendStylePane.setText("");
+                    //выводим легенду
+                    outLegend(legendStylePane, legendStyleDoc);
 
                     try
                     {
@@ -230,6 +223,19 @@ public class BoxWindow extends JFrame
                     reportStylePane.setCaretPosition(0);
                     logStylePane.setCaretPosition(0);
                 }
+                else if (!isCaseFile && !isLogFile)
+                {
+                    reportStylePane.setText("Ты не загрузил ни файла с тест-кейсом, ни файла с логом, чего же ты ждешь?");
+                }
+                else if (isCaseFile && !isLogFile)
+                {
+                    reportStylePane.setText("Ты не загрузил файла с логом, я слишком ограниченный, чтобы самому " +
+                            "придумать фактический результат.");
+                }
+                else if (!isCaseFile && isLogFile)
+                {
+                    reportStylePane.setText("Ты не загрузил файла с тест-кейсом, с чем же мне сравнивать?");
+                }
             }
         };
 
@@ -244,10 +250,11 @@ public class BoxWindow extends JFrame
                 caseStylePane.setText("");
                 logStylePane.setText("");
                 reportStylePane.setText("");
-                setDefaultText(caseStylePane, logStylePane, reportStylePane, caseStyleDoc, logStyleDoc, reportStyleDoc);
+                legendStylePane.setText("");
+                setDefaultText(caseStylePane, logStylePane, reportStylePane, legendStylePane,
+                        caseStyleDoc, logStyleDoc, reportStyleDoc, legendStyleDoc);
             }
         };
-
 
         //button panel
 
@@ -276,18 +283,19 @@ public class BoxWindow extends JFrame
         doCheckButton.addActionListener(checkButtonListener);
         cleanButton.addActionListener(cleanButtonListener);
 
-
         panel.add(dataPanel);
         panel.add(buttonPanel);
 
+        // заполняем окна дефолтными записями с инструкцией и легендой
+        setDefaultText(caseStylePane, logStylePane, reportStylePane, legendStylePane,
+                caseStyleDoc, logStyleDoc, reportStyleDoc, legendStyleDoc);
+        // с этой строкой программа почему-то запускается раз через три, как быстрое решение, ставлю ее отрисовку позже
+        // надеюсь придумать что-нибудь умное в будущем
+        //outLegend(legendStylePane, legendStyleDoc);
 
         getContentPane().add(panel);
         pack();
         setLocationRelativeTo(null);
-
-        //заполняем окна дефолтными записями с инструкцией и легендой
-        setDefaultText(caseStylePane, logStylePane, reportStylePane, caseStyleDoc, logStyleDoc, reportStyleDoc);
-        outLegend(legendStylePane, legendStyleDoc);
     }
 
     public static void main(String[] args)
@@ -346,33 +354,35 @@ public class BoxWindow extends JFrame
         legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
         legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
         legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
-        legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
+        legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n " +
+                "(от no)\n", 1);
 
     }
 
     private void setDefaultText(JTextPane caseStylePane, JTextPane logStylePane, JTextPane reportStylePane,
-                                StyledDocument caseDoc, StyledDocument logDoc, StyledDocument reportDoc)
+                                JTextPane legendStylePane, StyledDocument caseDoc, StyledDocument logDoc,
+                                StyledDocument reportDoc, StyledDocument legendDoc)
     {
         StyledDocOut caseStyle = new StyledDocOut(caseStylePane, caseDoc);
         StyledDocOut logStyle = new StyledDocOut(logStylePane, logDoc);
         StyledDocOut reportStyle = new StyledDocOut(reportStylePane, reportDoc);
+        StyledDocOut legendStyle = new StyledDocOut(legendStylePane, legendDoc);
 
         //Заполняем окна стартовыми инструкциями:
-        String caseWindowDefaultString = "Загрузите по кнопке CaseLoad или перетащите мышкой из окна файл в " +
-                "формате .txt с тест-кейсом который хотите проверить.\n\n\n\n\n\n\n\n\n\n\n\n\n";
-        //caseStylePane.setText(caseWindowDefaultString);
+        String caseWindowDefaultString = "Загрузите по кнопке 'Case load' или перетащите мышкой из окна файл в " +
+                "формате .txt с тест-кейсом который хотите проверить.\n\n\n";
         caseStyle.printWithStyle(caseWindowDefaultString, 1);
 
-        String logWindowDefaultString = "Загрузите по кнопке LogLoad или перетащите мышкой из окна файл с логом в " +
+        String logWindowDefaultString = "Загрузите по кнопке 'Log load' или перетащите мышкой из окна файл с логом в " +
                 "формате .txt или .log, содержащий последнюю сессию приложения (а именно строку 'Starting shell'). " +
                 "После нажатия Check сюда будет выведена последняя сессия приложения, дабы можно было убедиться, " +
-                "что алгоритм сравнения сработал корректно";
-        //logStylePane.setText(logWindowDefaultString);
+                "что алгоритм сравнения сработал корректно.";
         logStyle.printWithStyle(logWindowDefaultString, 1);
 
         String reportWindowDefaultString = "Здесь будет сформирован отчет сравнения тест-кейса и логфайла по легенде " +
-                "приведенной слева снизу в окошке";
-        //reportStylePane.setText(reportWindowDefaultString);
+                "приведенной слева снизу в окошке, после нажатия кнопки Check.";
         reportStyle.printWithStyle(reportWindowDefaultString, 1);
-    }
+
+        String legendWindowDefaultString = "Место будущей легенды.";
+        legendStyle.printWithStyle(legendWindowDefaultString, 1);    }
 }
