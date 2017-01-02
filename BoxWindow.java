@@ -2,6 +2,8 @@
  * Created by mary on 18.09.16.
  */
 
+import sun.rmi.log.ReliableLog;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.*;
@@ -117,29 +119,33 @@ public class BoxWindow extends JFrame
                     outFile(caseFile, caseStyleDoc);
 
                     //выводим легенду
-                    try
-                    {
-                        legendStyleDoc.insertString(legendStyleDoc.getLength(), "\nЛегенда:\n\n", null);
-                    }
-                    catch (BadLocationException e)
-                    {
-                        System.out.println("Problem in out legend in loadCaseButtonListener");
-                    }
-
-                    StyledDocOut legendOutStyle = new StyledDocOut(legendStylePane, legendStyleDoc);
-                    legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
-                    legendOutStyle.printWithStyle("Expected event / Событие из кейса\n", 32); //green
-                    legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
-                    legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
-                    legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
-                    legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
-                    legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
-
+                    outLegend(legendStylePane, legendStyleDoc);
                     testCaseFile = caseFile;
                     isCaseFile = true;
                 }
             }
         };
+
+        //filedrop listener from the Robert Harder library http://www.iharder.net/current/java/filedrop/
+        new  FileDrop(caseStylePane, new FileDrop.Listener()
+        {
+            public void  filesDropped (java.io.File[] files)
+                {
+                    for( int i = 0; i < files.length; i++ )
+                    {
+                        caseStylePane.setText("");
+                        legendStylePane.setText("");
+                        File caseFile = files[0];
+                        prefFolder.put("LAST_CASE_FOLDER", caseFile.getAbsolutePath());
+                        testCaseFile = caseFile;
+                        outFile(caseFile, caseStyleDoc);
+                        //выводим легенду
+                        outLegend(legendStylePane, legendStyleDoc);
+                        isCaseFile = true;
+                    }
+                }
+            }
+        );
 
         ActionListener loadLogButtonListener = new ActionListener()
         {
@@ -164,6 +170,25 @@ public class BoxWindow extends JFrame
                 }
             }
         };
+
+        //filedrop listener from the Robert Harder library http://www.iharder.net/current/java/filedrop/
+        new  FileDrop(logStylePane, new FileDrop.Listener()
+            {
+                public void  filesDropped (java.io.File[] files)
+                {
+                    for( int i = 0; i < files.length; i++ )
+                    {
+                        logFile = files[0];
+                        prefFolder.put("LAST_LOG_FOLDER", logFile.getAbsolutePath());
+                        isLogFile = true;
+                        reportStylePane.setText(" Йоу, лог загружен!");
+                        logStylePane.setText("");
+                    }
+                }
+            }
+        );
+
+
 
         ActionListener checkButtonListener = new ActionListener()
         {
@@ -296,5 +321,26 @@ public class BoxWindow extends JFrame
         {
 
         }
+    }
+
+    private void outLegend(JTextPane legendStylePane, StyledDocument legendStyleDoc)
+    {
+        try
+        {
+            legendStyleDoc.insertString(legendStyleDoc.getLength(), "\nЛегенда:\n\n", null);
+        }
+        catch (BadLocationException e)
+        {
+            System.out.println("Problem in out legend in loadCaseButtonListener");
+        }
+        StyledDocOut legendOutStyle = new StyledDocOut(legendStylePane, legendStyleDoc);
+        legendOutStyle.printWithStyle("Bug / Ошибка\n", 31); //red
+        legendOutStyle.printWithStyle("Expected event / Событие из кейса\n", 32); //green
+        legendOutStyle.printWithStyle("Known bug / Известный баг\n", 33); //yellow
+        legendOutStyle.printWithStyle("- перед известным багом напишите в тест-кейсе символ w (от waited)\n", 1);
+        legendOutStyle.printWithStyle("Missing event / Событие из кейса отсутствует\n", 34); //blue
+        legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
+        legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
+
     }
 }
