@@ -208,12 +208,12 @@ public class BoxWindow extends JFrame
                         //19 - cut off const string in the start "Проверяемый кейс:\n\n"
                         finalTestCase = finalTestCase.substring(19);
 
-                        String filename = "filename.txt";
-                        PrintWriter out = new PrintWriter(filename);
+                        String caseFileName = testCaseFile.getName();
+                        PrintWriter out = new PrintWriter(caseFileName);
                         out.println(finalTestCase);
                         out.close();
 
-                        testCaseFile = new File (filename);
+                        testCaseFile = new File (caseFileName);
                     }
                     catch (BadLocationException e)
                     {
