@@ -54,7 +54,7 @@ public class GaParse
 			BufferedReader inCase = new BufferedReader(new InputStreamReader(new FileInputStream(caseFile)));
 
 			//начало новой сессии приложения в логе
-			String startSessionString = "* Known files:";
+			String startSessionString = "Starting shell";
 
 			//сюда будем считывать GA события из лога
 			List<Event> happenedEvents = new ArrayList();
@@ -77,7 +77,7 @@ public class GaParse
 					happenedEvents.add(new Event(docString, reportPane, reportOut));
 				}
 				//зафиксировали старт сессии
-				if (docString.equals(startSessionString))
+				if (docString.contains(startSessionString))
 					happenedEvents.add(new Event("Start", reportPane, reportOut, "00:00:00"));
 			}
 

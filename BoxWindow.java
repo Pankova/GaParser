@@ -73,8 +73,8 @@ public class BoxWindow extends JFrame
         //styledtext docs will be in style panels
         final StyledDocument caseStyleDoc = caseStylePane.getStyledDocument();
         final StyledDocument legendStyleDoc = legendStylePane.getStyledDocument();
-        /*final StyledDocument docLog = logStylePane.getStyledDocument();
-        final StyledDocument docReport = reportStylePane.getStyledDocument();*/
+        final StyledDocument logStyleDoc = logStylePane.getStyledDocument();
+        final StyledDocument reportStyleDoc = reportStylePane.getStyledDocument();
 
         //user can not edit panels
         caseStylePane.setEditable(true);
@@ -157,6 +157,7 @@ public class BoxWindow extends JFrame
 
                 FileNameExtensionFilter logFileFilter = new FileNameExtensionFilter("TXT and LOG files", "txt", "log");
                 logFileOpen.setFileFilter(logFileFilter);
+
 
                 int pushButtonResult = logFileOpen.showOpenDialog(logStylePane);
 
@@ -243,6 +244,7 @@ public class BoxWindow extends JFrame
                 caseStylePane.setText("");
                 logStylePane.setText("");
                 reportStylePane.setText("");
+                setDefaultText(caseStylePane, logStylePane, reportStylePane, caseStyleDoc, logStyleDoc, reportStyleDoc);
             }
         };
 
@@ -282,6 +284,10 @@ public class BoxWindow extends JFrame
         getContentPane().add(panel);
         pack();
         setLocationRelativeTo(null);
+
+        //заполняем окна дефолтными записями с инструкцией и легендой
+        setDefaultText(caseStylePane, logStylePane, reportStylePane, caseStyleDoc, logStyleDoc, reportStyleDoc);
+        outLegend(legendStylePane, legendStyleDoc);
     }
 
     public static void main(String[] args)
@@ -342,5 +348,31 @@ public class BoxWindow extends JFrame
         legendOutStyle.printWithStyle("Expected missing event / Известное отсутствующее событие\n", 35); //pink
         legendOutStyle.printWithStyle("- перед известным отсутствующим событием напишите в тест-кейсе символ n (от no)\n", 1);
 
+    }
+
+    private void setDefaultText(JTextPane caseStylePane, JTextPane logStylePane, JTextPane reportStylePane,
+                                StyledDocument caseDoc, StyledDocument logDoc, StyledDocument reportDoc)
+    {
+        StyledDocOut caseStyle = new StyledDocOut(caseStylePane, caseDoc);
+        StyledDocOut logStyle = new StyledDocOut(logStylePane, logDoc);
+        StyledDocOut reportStyle = new StyledDocOut(reportStylePane, reportDoc);
+
+        //Заполняем окна стартовыми инструкциями:
+        String caseWindowDefaultString = "Загрузите по кнопке CaseLoad или перетащите мышкой из окна файл в " +
+                "формате .txt с тест-кейсом который хотите проверить.\n\n\n\n\n\n\n\n\n\n\n\n\n";
+        //caseStylePane.setText(caseWindowDefaultString);
+        caseStyle.printWithStyle(caseWindowDefaultString, 1);
+
+        String logWindowDefaultString = "Загрузите по кнопке LogLoad или перетащите мышкой из окна файл с логом в " +
+                "формате .txt или .log, содержащий последнюю сессию приложения (а именно строку 'Starting shell'). " +
+                "После нажатия Check сюда будет выведена последняя сессия приложения, дабы можно было убедиться, " +
+                "что алгоритм сравнения сработал корректно";
+        //logStylePane.setText(logWindowDefaultString);
+        logStyle.printWithStyle(logWindowDefaultString, 1);
+
+        String reportWindowDefaultString = "Здесь будет сформирован отчет сравнения тест-кейса и логфайла по легенде " +
+                "приведенной слева снизу в окошке";
+        //reportStylePane.setText(reportWindowDefaultString);
+        reportStyle.printWithStyle(reportWindowDefaultString, 1);
     }
 }
