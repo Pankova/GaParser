@@ -25,7 +25,7 @@ public class BoxWindow extends JFrame
 
     BoxWindow()
     {
-        super("GaParser 0.2"); //Заголовок окна
+        super("GaParser 0.3"); //Заголовок окна
         //setBounds(100, 100, 200, 200);
 
         //чтобы при закрытии окна закрывалась и программа (не висела в процессах)
