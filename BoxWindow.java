@@ -76,7 +76,7 @@ public class BoxWindow extends JFrame
         final StyledDocument reportStyleDoc = reportStylePane.getStyledDocument();
 
         //user can not edit panels except casePanel
-        caseStylePane.setEditable(true);
+        caseStylePane.setEditable(false);
         legendStylePane.setEditable(false);
         reportStylePane.setEditable(false);
         logStylePane.setEditable(false);
@@ -115,6 +115,7 @@ public class BoxWindow extends JFrame
                     outFile(caseFile, caseStyleDoc);
                     caseStylePane.setCaretPosition(0);
                     testCaseFile = caseFile;
+                    caseStylePane.setEditable(true);
                     isCaseFile = true;
                 }
             }
@@ -133,6 +134,7 @@ public class BoxWindow extends JFrame
                         testCaseFile = caseFile;
                         outFile(caseFile, caseStyleDoc);
                         caseStylePane.setCaretPosition(0);
+                        caseStylePane.setEditable(true);
                         isCaseFile = true;
                     }
                 }
@@ -253,6 +255,7 @@ public class BoxWindow extends JFrame
                 legendStylePane.setText("");
                 setDefaultText(caseStylePane, logStylePane, reportStylePane, legendStylePane,
                         caseStyleDoc, logStyleDoc, reportStyleDoc, legendStyleDoc);
+                caseStylePane.setEditable(false);
             }
         };
 
